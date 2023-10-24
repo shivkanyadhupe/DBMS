@@ -1,0 +1,735 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyP/EvDZLiAgN+rjDH3gawtV",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/shivkanyadhupe/DBMS/blob/main/HR%20Analyst%20data%20set%20ANN%2C%20SVM%2C%20Naive%20bayes\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 5,
+      "metadata": {
+        "id": "-CarlR7uLN3Z"
+      },
+      "outputs": [],
+      "source": [
+        "import pandas as pd"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from sklearn.model_selection import train_test_split"
+      ],
+      "metadata": {
+        "id": "DGQZBkD_QuNP"
+      },
+      "execution_count": 6,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from sklearn.preprocessing import StandardScaler\n"
+      ],
+      "metadata": {
+        "id": "zdI8Lrx3QuWY"
+      },
+      "execution_count": 7,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from sklearn.svm import SVC"
+      ],
+      "metadata": {
+        "id": "L7Y5uqNJQucO"
+      },
+      "execution_count": 8,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import tensorflow as tf"
+      ],
+      "metadata": {
+        "id": "XgJfxD-vQuiC"
+      },
+      "execution_count": 9,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from tensorflow import keras"
+      ],
+      "metadata": {
+        "id": "BLCPmyX8Qukq"
+      },
+      "execution_count": 10,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from sklearn.metrics import accuracy_score"
+      ],
+      "metadata": {
+        "id": "fE89OeZtQunu"
+      },
+      "execution_count": 11,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "data = pd.read_csv('/content/WA_Fn-UseC_-HR-Employee-Attrition.csv')\n"
+      ],
+      "metadata": {
+        "id": "Qhr6IPKMSYXH"
+      },
+      "execution_count": 12,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Data Preprocessing"
+      ],
+      "metadata": {
+        "id": "WDBS7bGiSe3O"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Handle missing values (if any)\n",
+        "data = data.dropna()\n",
+        "\n",
+        "# Encode categorical variables using one-hot encoding\n",
+        "categorical_cols = ['BusinessTravel', 'Department', 'EducationField', 'Gender', 'JobRole', 'MaritalStatus', 'Over18', 'OverTime']\n",
+        "data = pd.get_dummies(data, columns=categorical_cols)\n",
+        "\n",
+        "# Split the dataset into features (X) and the target variable (y)\n",
+        "X = data.drop('Attrition', axis=1)\n",
+        "y = data['Attrition']\n"
+      ],
+      "metadata": {
+        "id": "SQJXU3FPSYr2"
+      },
+      "execution_count": 13,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from sklearn.preprocessing import LabelEncoder\n",
+        "\n",
+        "# Initialize a label encoder\n",
+        "label_encoder = LabelEncoder()\n",
+        "\n",
+        "# Encode the 'Attrition' column\n",
+        "data['Attrition'] = label_encoder.fit_transform(data['Attrition'])\n"
+      ],
+      "metadata": {
+        "id": "JCFO7qAGfkWq"
+      },
+      "execution_count": 14,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        " Split Data into Training and Testing Sets"
+      ],
+      "metadata": {
+        "id": "apGPjW_5U6UK"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Split the dataset into features (X) and the target variable (y) after one-hot encoding\n",
+        "X = data.drop('Attrition', axis=1)\n",
+        "y = data['Attrition']\n",
+        "\n",
+        "# Split the dataset into training and testing sets\n",
+        "X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)\n"
+      ],
+      "metadata": {
+        "id": "1BLmorfqU53M"
+      },
+      "execution_count": 15,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Feature Scaling with Min-Max Scaling"
+      ],
+      "metadata": {
+        "id": "4O7rbdz5YA2i"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from sklearn.preprocessing import MinMaxScaler\n",
+        "\n",
+        "# Create a MinMaxScaler\n",
+        "scaler = MinMaxScaler()\n",
+        "\n",
+        "# Fit and transform the training data\n",
+        "X_train_scaled = scaler.fit_transform(X_train)\n",
+        "\n",
+        "# Transform the test data\n",
+        "X_test_scaled = scaler.transform(X_test)\n"
+      ],
+      "metadata": {
+        "id": "qfRSdn-4SYu_"
+      },
+      "execution_count": 16,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Support Vector Machine (SVM)"
+      ],
+      "metadata": {
+        "id": "MQFXOhB8YQrq"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Create an SVM classifier with a different kernel (e.g., 'rbf') and a custom C parameter (e.g., C=1.0)\n",
+        "svm_classifier = SVC(kernel='rbf', C=1.0)\n",
+        "\n",
+        "# Train the SVM classifier on the training data\n",
+        "svm_classifier.fit(X_train_scaled, y_train)\n",
+        "\n",
+        "# Make predictions on the test data\n",
+        "svm_predictions = svm_classifier.predict(X_test_scaled)\n",
+        "\n",
+        "# Evaluate the SVM model\n",
+        "svm_accuracy = accuracy_score(y_test, svm_predictions)\n",
+        "print(\"SVM Accuracy:\", svm_accuracy)\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "woDR7b-sYPtm",
+        "outputId": "3f80f682-66f1-45aa-eb08-3fa99f444a7b"
+      },
+      "execution_count": 17,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "SVM Accuracy: 0.8877551020408163\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        " Label Encoding for Specific Columns"
+      ],
+      "metadata": {
+        "id": "5f-0dO8CYne1"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Handle missing values (if any)\n",
+        "data = data.dropna()\n",
+        "\n",
+        "# Define the list of columns to be label encoded (categorical columns)\n",
+        "categorical_columns = ['BusinessTravel_Non-Travel', 'BusinessTravel_Travel_Frequently', 'BusinessTravel_Travel_Rarely', 'Department_Human Resources', 'Department_Research & Development', 'Department_Sales', 'EducationField_Human Resources', 'EducationField_Life Sciences', 'EducationField_Marketing', 'EducationField_Medical', 'EducationField_Other', 'EducationField_Technical Degree', 'Gender_Female', 'Gender_Male', 'JobRole_Healthcare Representative', 'JobRole_Human Resources', 'JobRole_Laboratory Technician', 'JobRole_Manager', 'JobRole_Manufacturing Director', 'JobRole_Research Director', 'JobRole_Research Scientist', 'JobRole_Sales Executive', 'JobRole_Sales Representative', 'MaritalStatus_Divorced', 'MaritalStatus_Married', 'MaritalStatus_Single', 'Over18_Y', 'OverTime_No', 'OverTime_Yes']\n",
+        "\n",
+        "# Initialize a label encoder\n",
+        "label_encoder = LabelEncoder()\n",
+        "\n",
+        "# Apply label encoding to the specified columns\n",
+        "for column in categorical_columns:\n",
+        "    data[column] = label_encoder.fit_transform(data[column])\n",
+        "\n",
+        "# Split the dataset into features (X) and the target variable (y)\n",
+        "X = data.drop('Attrition', axis=1)\n",
+        "y = data['Attrition']\n"
+      ],
+      "metadata": {
+        "id": "THIVgjtrdX9W"
+      },
+      "execution_count": 18,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Artificial Neural Network (ANN)"
+      ],
+      "metadata": {
+        "id": "XVWpDI_mdsMw"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "For label encoding"
+      ],
+      "metadata": {
+        "id": "FDYETbUD85uy"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from sklearn.preprocessing import LabelEncoder"
+      ],
+      "metadata": {
+        "id": "wst13kLQ7gGy"
+      },
+      "execution_count": 20,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Define the list of columns to be label encoded (categorical columns)\n",
+        "categorical_columns = ['BusinessTravel_Non-Travel', 'BusinessTravel_Travel_Frequently', 'BusinessTravel_Travel_Rarely', 'Department_Human Resources', 'Department_Research & Development', 'Department_Sales', 'EducationField_Human Resources', 'EducationField_Life Sciences', 'EducationField_Marketing', 'EducationField_Medical', 'EducationField_Other', 'EducationField_Technical Degree', 'Gender_Female', 'Gender_Male', 'JobRole_Healthcare Representative', 'JobRole_Human Resources', 'JobRole_Laboratory Technician', 'JobRole_Manager', 'JobRole_Manufacturing Director', 'JobRole_Research Director', 'JobRole_Research Scientist', 'JobRole_Sales Executive', 'JobRole_Sales Representative', 'MaritalStatus_Divorced', 'MaritalStatus_Married', 'MaritalStatus_Single', 'Over18_Y', 'OverTime_No', 'OverTime_Yes']\n"
+      ],
+      "metadata": {
+        "id": "5PJe2bgZ7gDW"
+      },
+      "execution_count": 21,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Initialize a label encoder\n",
+        "label_encoder = LabelEncoder()\n"
+      ],
+      "metadata": {
+        "id": "wLgeA7C57gA-"
+      },
+      "execution_count": 22,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Apply label encoding to the specified columns\n",
+        "for column in categorical_columns:\n",
+        "    data[column] = label_encoder.fit_transform(data[column])\n"
+      ],
+      "metadata": {
+        "id": "zlFyQFgW7f-e"
+      },
+      "execution_count": 23,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(y_train.dtype)"
+      ],
+      "metadata": {
+        "id": "6VZnytvW9rae"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(data['Attrition'].unique())"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "qsl7OBAn9Dd8",
+        "outputId": "248e2801-5975-4b20-a4c3-a5375cf13f63"
+      },
+      "execution_count": 25,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "[1 0]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import tensorflow as tf\n",
+        "from tensorflow import keras\n",
+        "\n",
+        "# Define the ANN model\n",
+        "model = keras.Sequential([\n",
+        "    keras.layers.Dense(128, activation='relu', input_shape=(X_train_scaled.shape[1],)),  # Input layer with 128 units\n",
+        "    keras.layers.Dense(64, activation='relu'),  # Hidden layer with 64 units\n",
+        "    keras.layers.Dense(1, activation='sigmoid')  # Output layer for binary classification\n",
+        "])\n",
+        "\n",
+        "# Compile the model\n",
+        "model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])\n",
+        "\n",
+        "# Train the model on the training data\n",
+        "model.fit(X_train_scaled, y_train, epochs=80, batch_size=1470)\n",
+        "\n",
+        "# Evaluate the ANN model on the test data\n",
+        "ann_loss, ann_accuracy = model.evaluate(X_test_scaled, y_test)\n",
+        "print(\"ANN Accuracy:\", ann_accuracy)\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "FntqGtZPdFxv",
+        "outputId": "e1d6d017-cd39-402a-c7aa-6556a3b11a3c"
+      },
+      "execution_count": 24,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Epoch 1/80\n",
+            "1/1 [==============================] - 1s 1s/step - loss: 0.7056 - accuracy: 0.4269\n",
+            "Epoch 2/80\n",
+            "1/1 [==============================] - 0s 15ms/step - loss: 0.6463 - accuracy: 0.7509\n",
+            "Epoch 3/80\n",
+            "1/1 [==============================] - 0s 13ms/step - loss: 0.5959 - accuracy: 0.8265\n",
+            "Epoch 4/80\n",
+            "1/1 [==============================] - 0s 14ms/step - loss: 0.5539 - accuracy: 0.8316\n",
+            "Epoch 5/80\n",
+            "1/1 [==============================] - 0s 15ms/step - loss: 0.5197 - accuracy: 0.8316\n",
+            "Epoch 6/80\n",
+            "1/1 [==============================] - 0s 17ms/step - loss: 0.4926 - accuracy: 0.8316\n",
+            "Epoch 7/80\n",
+            "1/1 [==============================] - 0s 15ms/step - loss: 0.4721 - accuracy: 0.8316\n",
+            "Epoch 8/80\n",
+            "1/1 [==============================] - 0s 14ms/step - loss: 0.4574 - accuracy: 0.8316\n",
+            "Epoch 9/80\n",
+            "1/1 [==============================] - 0s 17ms/step - loss: 0.4477 - accuracy: 0.8316\n",
+            "Epoch 10/80\n",
+            "1/1 [==============================] - 0s 15ms/step - loss: 0.4422 - accuracy: 0.8316\n",
+            "Epoch 11/80\n",
+            "1/1 [==============================] - 0s 15ms/step - loss: 0.4398 - accuracy: 0.8316\n",
+            "Epoch 12/80\n",
+            "1/1 [==============================] - 0s 14ms/step - loss: 0.4395 - accuracy: 0.8316\n",
+            "Epoch 13/80\n",
+            "1/1 [==============================] - 0s 14ms/step - loss: 0.4401 - accuracy: 0.8316\n",
+            "Epoch 14/80\n",
+            "1/1 [==============================] - 0s 15ms/step - loss: 0.4407 - accuracy: 0.8316\n",
+            "Epoch 15/80\n",
+            "1/1 [==============================] - 0s 16ms/step - loss: 0.4407 - accuracy: 0.8316\n",
+            "Epoch 16/80\n",
+            "1/1 [==============================] - 0s 13ms/step - loss: 0.4398 - accuracy: 0.8316\n",
+            "Epoch 17/80\n",
+            "1/1 [==============================] - 0s 13ms/step - loss: 0.4379 - accuracy: 0.8316\n",
+            "Epoch 18/80\n",
+            "1/1 [==============================] - 0s 13ms/step - loss: 0.4350 - accuracy: 0.8316\n",
+            "Epoch 19/80\n",
+            "1/1 [==============================] - 0s 13ms/step - loss: 0.4313 - accuracy: 0.8316\n",
+            "Epoch 20/80\n",
+            "1/1 [==============================] - 0s 14ms/step - loss: 0.4272 - accuracy: 0.8316\n",
+            "Epoch 21/80\n",
+            "1/1 [==============================] - 0s 15ms/step - loss: 0.4228 - accuracy: 0.8316\n",
+            "Epoch 22/80\n",
+            "1/1 [==============================] - 0s 13ms/step - loss: 0.4184 - accuracy: 0.8316\n",
+            "Epoch 23/80\n",
+            "1/1 [==============================] - 0s 12ms/step - loss: 0.4142 - accuracy: 0.8316\n",
+            "Epoch 24/80\n",
+            "1/1 [==============================] - 0s 14ms/step - loss: 0.4104 - accuracy: 0.8316\n",
+            "Epoch 25/80\n",
+            "1/1 [==============================] - 0s 14ms/step - loss: 0.4069 - accuracy: 0.8316\n",
+            "Epoch 26/80\n",
+            "1/1 [==============================] - 0s 20ms/step - loss: 0.4037 - accuracy: 0.8316\n",
+            "Epoch 27/80\n",
+            "1/1 [==============================] - 0s 14ms/step - loss: 0.4010 - accuracy: 0.8316\n",
+            "Epoch 28/80\n",
+            "1/1 [==============================] - 0s 14ms/step - loss: 0.3986 - accuracy: 0.8316\n",
+            "Epoch 29/80\n",
+            "1/1 [==============================] - 0s 12ms/step - loss: 0.3963 - accuracy: 0.8316\n",
+            "Epoch 30/80\n",
+            "1/1 [==============================] - 0s 13ms/step - loss: 0.3942 - accuracy: 0.8316\n",
+            "Epoch 31/80\n",
+            "1/1 [==============================] - 0s 14ms/step - loss: 0.3920 - accuracy: 0.8316\n",
+            "Epoch 32/80\n",
+            "1/1 [==============================] - 0s 13ms/step - loss: 0.3896 - accuracy: 0.8316\n",
+            "Epoch 33/80\n",
+            "1/1 [==============================] - 0s 13ms/step - loss: 0.3870 - accuracy: 0.8316\n",
+            "Epoch 34/80\n",
+            "1/1 [==============================] - 0s 12ms/step - loss: 0.3843 - accuracy: 0.8316\n",
+            "Epoch 35/80\n",
+            "1/1 [==============================] - 0s 14ms/step - loss: 0.3813 - accuracy: 0.8316\n",
+            "Epoch 36/80\n",
+            "1/1 [==============================] - 0s 12ms/step - loss: 0.3784 - accuracy: 0.8325\n",
+            "Epoch 37/80\n",
+            "1/1 [==============================] - 0s 13ms/step - loss: 0.3754 - accuracy: 0.8333\n",
+            "Epoch 38/80\n",
+            "1/1 [==============================] - 0s 13ms/step - loss: 0.3725 - accuracy: 0.8342\n",
+            "Epoch 39/80\n",
+            "1/1 [==============================] - 0s 16ms/step - loss: 0.3697 - accuracy: 0.8342\n",
+            "Epoch 40/80\n",
+            "1/1 [==============================] - 0s 16ms/step - loss: 0.3670 - accuracy: 0.8359\n",
+            "Epoch 41/80\n",
+            "1/1 [==============================] - 0s 20ms/step - loss: 0.3645 - accuracy: 0.8376\n",
+            "Epoch 42/80\n",
+            "1/1 [==============================] - 0s 15ms/step - loss: 0.3621 - accuracy: 0.8384\n",
+            "Epoch 43/80\n",
+            "1/1 [==============================] - 0s 12ms/step - loss: 0.3597 - accuracy: 0.8401\n",
+            "Epoch 44/80\n",
+            "1/1 [==============================] - 0s 13ms/step - loss: 0.3573 - accuracy: 0.8410\n",
+            "Epoch 45/80\n",
+            "1/1 [==============================] - 0s 13ms/step - loss: 0.3549 - accuracy: 0.8410\n",
+            "Epoch 46/80\n",
+            "1/1 [==============================] - 0s 13ms/step - loss: 0.3524 - accuracy: 0.8418\n",
+            "Epoch 47/80\n",
+            "1/1 [==============================] - 0s 13ms/step - loss: 0.3500 - accuracy: 0.8418\n",
+            "Epoch 48/80\n",
+            "1/1 [==============================] - 0s 13ms/step - loss: 0.3476 - accuracy: 0.8469\n",
+            "Epoch 49/80\n",
+            "1/1 [==============================] - 0s 13ms/step - loss: 0.3454 - accuracy: 0.8495\n",
+            "Epoch 50/80\n",
+            "1/1 [==============================] - 0s 14ms/step - loss: 0.3434 - accuracy: 0.8529\n",
+            "Epoch 51/80\n",
+            "1/1 [==============================] - 0s 14ms/step - loss: 0.3414 - accuracy: 0.8554\n",
+            "Epoch 52/80\n",
+            "1/1 [==============================] - 0s 14ms/step - loss: 0.3395 - accuracy: 0.8588\n",
+            "Epoch 53/80\n",
+            "1/1 [==============================] - 0s 14ms/step - loss: 0.3377 - accuracy: 0.8614\n",
+            "Epoch 54/80\n",
+            "1/1 [==============================] - 0s 13ms/step - loss: 0.3358 - accuracy: 0.8622\n",
+            "Epoch 55/80\n",
+            "1/1 [==============================] - 0s 13ms/step - loss: 0.3340 - accuracy: 0.8588\n",
+            "Epoch 56/80\n",
+            "1/1 [==============================] - 0s 16ms/step - loss: 0.3321 - accuracy: 0.8597\n",
+            "Epoch 57/80\n",
+            "1/1 [==============================] - 0s 20ms/step - loss: 0.3304 - accuracy: 0.8622\n",
+            "Epoch 58/80\n",
+            "1/1 [==============================] - 0s 23ms/step - loss: 0.3287 - accuracy: 0.8639\n",
+            "Epoch 59/80\n",
+            "1/1 [==============================] - 0s 18ms/step - loss: 0.3271 - accuracy: 0.8631\n",
+            "Epoch 60/80\n",
+            "1/1 [==============================] - 0s 17ms/step - loss: 0.3255 - accuracy: 0.8639\n",
+            "Epoch 61/80\n",
+            "1/1 [==============================] - 0s 17ms/step - loss: 0.3240 - accuracy: 0.8648\n",
+            "Epoch 62/80\n",
+            "1/1 [==============================] - 0s 12ms/step - loss: 0.3224 - accuracy: 0.8648\n",
+            "Epoch 63/80\n",
+            "1/1 [==============================] - 0s 12ms/step - loss: 0.3208 - accuracy: 0.8690\n",
+            "Epoch 64/80\n",
+            "1/1 [==============================] - 0s 16ms/step - loss: 0.3193 - accuracy: 0.8699\n",
+            "Epoch 65/80\n",
+            "1/1 [==============================] - 0s 15ms/step - loss: 0.3179 - accuracy: 0.8707\n",
+            "Epoch 66/80\n",
+            "1/1 [==============================] - 0s 11ms/step - loss: 0.3164 - accuracy: 0.8716\n",
+            "Epoch 67/80\n",
+            "1/1 [==============================] - 0s 11ms/step - loss: 0.3150 - accuracy: 0.8716\n",
+            "Epoch 68/80\n",
+            "1/1 [==============================] - 0s 16ms/step - loss: 0.3135 - accuracy: 0.8716\n",
+            "Epoch 69/80\n",
+            "1/1 [==============================] - 0s 16ms/step - loss: 0.3120 - accuracy: 0.8750\n",
+            "Epoch 70/80\n",
+            "1/1 [==============================] - 0s 13ms/step - loss: 0.3106 - accuracy: 0.8759\n",
+            "Epoch 71/80\n",
+            "1/1 [==============================] - 0s 15ms/step - loss: 0.3091 - accuracy: 0.8741\n",
+            "Epoch 72/80\n",
+            "1/1 [==============================] - 0s 14ms/step - loss: 0.3077 - accuracy: 0.8741\n",
+            "Epoch 73/80\n",
+            "1/1 [==============================] - 0s 14ms/step - loss: 0.3062 - accuracy: 0.8741\n",
+            "Epoch 74/80\n",
+            "1/1 [==============================] - 0s 14ms/step - loss: 0.3048 - accuracy: 0.8741\n",
+            "Epoch 75/80\n",
+            "1/1 [==============================] - 0s 14ms/step - loss: 0.3033 - accuracy: 0.8759\n",
+            "Epoch 76/80\n",
+            "1/1 [==============================] - 0s 14ms/step - loss: 0.3018 - accuracy: 0.8767\n",
+            "Epoch 77/80\n",
+            "1/1 [==============================] - 0s 16ms/step - loss: 0.3003 - accuracy: 0.8784\n",
+            "Epoch 78/80\n",
+            "1/1 [==============================] - 0s 13ms/step - loss: 0.2988 - accuracy: 0.8793\n",
+            "Epoch 79/80\n",
+            "1/1 [==============================] - 0s 13ms/step - loss: 0.2973 - accuracy: 0.8835\n",
+            "Epoch 80/80\n",
+            "1/1 [==============================] - 0s 13ms/step - loss: 0.2958 - accuracy: 0.8844\n",
+            "10/10 [==============================] - 0s 2ms/step - loss: 0.3598 - accuracy: 0.8469\n",
+            "ANN Accuracy: 0.8469387888908386\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Naive Bayes classifier"
+      ],
+      "metadata": {
+        "id": "MsWRAkuA-6dM"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from sklearn.model_selection import train_test_split\n",
+        "from sklearn.naive_bayes import GaussianNB\n",
+        "from sklearn.metrics import accuracy_score\n"
+      ],
+      "metadata": {
+        "id": "DM0-3NzSdF0H"
+      },
+      "execution_count": 26,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Define the feature matrix (X) and the target variable (y)\n",
+        "X = data.drop('Attrition', axis=1)\n",
+        "y = data['Attrition']"
+      ],
+      "metadata": {
+        "id": "fI_08IOG-IY3"
+      },
+      "execution_count": 27,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Split the data into training and testing sets\n",
+        "X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)\n"
+      ],
+      "metadata": {
+        "id": "-Rcz2ulR-IVU"
+      },
+      "execution_count": 28,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Fit (train) the classifier on the training data\n",
+        "naive_bayes_classifier.fit(X_train, y_train)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 74
+        },
+        "id": "z_kZrWKx_-v2",
+        "outputId": "2e1acc38-be26-4e15-bf0e-13f7c60df376"
+      },
+      "execution_count": 32,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "GaussianNB()"
+            ],
+            "text/html": [
+              "<style>#sk-container-id-1 {color: black;background-color: white;}#sk-container-id-1 pre{padding: 0;}#sk-container-id-1 div.sk-toggleable {background-color: white;}#sk-container-id-1 label.sk-toggleable__label {cursor: pointer;display: block;width: 100%;margin-bottom: 0;padding: 0.3em;box-sizing: border-box;text-align: center;}#sk-container-id-1 label.sk-toggleable__label-arrow:before {content: \"▸\";float: left;margin-right: 0.25em;color: #696969;}#sk-container-id-1 label.sk-toggleable__label-arrow:hover:before {color: black;}#sk-container-id-1 div.sk-estimator:hover label.sk-toggleable__label-arrow:before {color: black;}#sk-container-id-1 div.sk-toggleable__content {max-height: 0;max-width: 0;overflow: hidden;text-align: left;background-color: #f0f8ff;}#sk-container-id-1 div.sk-toggleable__content pre {margin: 0.2em;color: black;border-radius: 0.25em;background-color: #f0f8ff;}#sk-container-id-1 input.sk-toggleable__control:checked~div.sk-toggleable__content {max-height: 200px;max-width: 100%;overflow: auto;}#sk-container-id-1 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {content: \"▾\";}#sk-container-id-1 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 input.sk-hidden--visually {border: 0;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);height: 1px;margin: -1px;overflow: hidden;padding: 0;position: absolute;width: 1px;}#sk-container-id-1 div.sk-estimator {font-family: monospace;background-color: #f0f8ff;border: 1px dotted black;border-radius: 0.25em;box-sizing: border-box;margin-bottom: 0.5em;}#sk-container-id-1 div.sk-estimator:hover {background-color: #d4ebff;}#sk-container-id-1 div.sk-parallel-item::after {content: \"\";width: 100%;border-bottom: 1px solid gray;flex-grow: 1;}#sk-container-id-1 div.sk-label:hover label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 div.sk-serial::before {content: \"\";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: 0;}#sk-container-id-1 div.sk-serial {display: flex;flex-direction: column;align-items: center;background-color: white;padding-right: 0.2em;padding-left: 0.2em;position: relative;}#sk-container-id-1 div.sk-item {position: relative;z-index: 1;}#sk-container-id-1 div.sk-parallel {display: flex;align-items: stretch;justify-content: center;background-color: white;position: relative;}#sk-container-id-1 div.sk-item::before, #sk-container-id-1 div.sk-parallel-item::before {content: \"\";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: -1;}#sk-container-id-1 div.sk-parallel-item {display: flex;flex-direction: column;z-index: 1;position: relative;background-color: white;}#sk-container-id-1 div.sk-parallel-item:first-child::after {align-self: flex-end;width: 50%;}#sk-container-id-1 div.sk-parallel-item:last-child::after {align-self: flex-start;width: 50%;}#sk-container-id-1 div.sk-parallel-item:only-child::after {width: 0;}#sk-container-id-1 div.sk-dashed-wrapped {border: 1px dashed gray;margin: 0 0.4em 0.5em 0.4em;box-sizing: border-box;padding-bottom: 0.4em;background-color: white;}#sk-container-id-1 div.sk-label label {font-family: monospace;font-weight: bold;display: inline-block;line-height: 1.2em;}#sk-container-id-1 div.sk-label-container {text-align: center;}#sk-container-id-1 div.sk-container {/* jupyter's `normalize.less` sets `[hidden] { display: none; }` but bootstrap.min.css set `[hidden] { display: none !important; }` so we also need the `!important` here to be able to override the default hidden behavior on the sphinx rendered scikit-learn.org. See: https://github.com/scikit-learn/scikit-learn/issues/21755 */display: inline-block !important;position: relative;}#sk-container-id-1 div.sk-text-repr-fallback {display: none;}</style><div id=\"sk-container-id-1\" class=\"sk-top-container\"><div class=\"sk-text-repr-fallback\"><pre>GaussianNB()</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br />On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class=\"sk-container\" hidden><div class=\"sk-item\"><div class=\"sk-estimator sk-toggleable\"><input class=\"sk-toggleable__control sk-hidden--visually\" id=\"sk-estimator-id-1\" type=\"checkbox\" checked><label for=\"sk-estimator-id-1\" class=\"sk-toggleable__label sk-toggleable__label-arrow\">GaussianNB</label><div class=\"sk-toggleable__content\"><pre>GaussianNB()</pre></div></div></div></div></div>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 32
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Create a Gaussian Naive Bayes classifier\n",
+        "naive_bayes_classifier = GaussianNB()"
+      ],
+      "metadata": {
+        "id": "89vBbD60-ITL"
+      },
+      "execution_count": 29,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Make predictions on the test data\n",
+        "naive_bayes_predictions = naive_bayes_classifier.predict(X_test)\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "f--ykSk9-IQT"
+      },
+      "execution_count": 33,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Evaluate the Naive Bayes model\n",
+        "accuracy = accuracy_score(y_test, naive_bayes_predictions)\n",
+        "print(\"Naive Bayes Accuracy:\", accuracy)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "hI1Jq_Kz-INo",
+        "outputId": "aa793b7e-912d-4a8f-c186-542dbeaa5d02"
+      },
+      "execution_count": 34,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Naive Bayes Accuracy: 0.7721088435374149\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [],
+      "metadata": {
+        "id": "GUeSdTxt-IKp"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
